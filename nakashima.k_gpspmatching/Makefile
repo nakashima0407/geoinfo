@@ -1,25 +1,35 @@
 PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-OBJS = gpsdistance.o
+OBJS = gpslcs.o gpspoint.o
+HEADERS = gpspoint.h
 
 ifeq ($(BUILD_MODE),debug)
-	CFLAGS += -g
+	CXXFLAGS += -std=c++1z -g
 else ifeq ($(BUILD_MODE),run)
-	CFLAGS += -O2
-else
-	$(error Build mode $(BUILD_MODE) not supported by this Makefile)
+	CXXFLAGS += -std=c++1z -O2
+else 
+	CXXFLAGS += -std=c++1z -g -Wall
+#	$(error Build mode $(BUILD_MODE) not supported by this Makefile)
 endif
 
-all:	gpslcs
+TARGET = gpslcs.exe
 
-gpslcs:	$(OBJS)
+all:	$(TARGET)
+
+TESTOBJ = test.o
+
+test.exe:   $(TESTOBJ)
 	$(CXX) -o $@ $^
 
-%.o:	$(PROJECT_ROOT)%.cpp
-	$(CXX) -c $(CFLAGS) $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
+gpslcs.exe:	$(OBJS)
+	$(CXX) -o $@ $^
 
-%.o:	$(PROJECT_ROOT)%.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
+
+%.o:	$(PROJECT_ROOT)%.cpp $(HEADERS)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+%.o:	$(PROJECT_ROOT)%.c 
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 clean:
-	rm -fr gpslcs $(OBJS)
+	rm -fr *.exe $(OBJS) $(TESTOBJ)
